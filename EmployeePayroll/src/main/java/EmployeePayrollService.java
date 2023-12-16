@@ -1,9 +1,5 @@
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-
-import java.util.Scanner;
 
 public class EmployeePayrollService {
     public enum IOService {CONSOLE_IO, FILE_IO, DB_IO, REST_IO}
@@ -15,14 +11,22 @@ public class EmployeePayrollService {
         employeePayrollDBService = EmployeePayrollDBService.getInstance();
     }
 
-    public EmployeePayrollService(List<EmployeePayrollData> employeePayrollList) {
-        this();
-        this.employeePayrollList = employeePayrollList;
+    public static void main(String[] args) throws SQLException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(EmployeePayrollService.IOService.DB_IO);
+        System.out.println(employeePayrollData);
+        employeePayrollService.updateEmployeeSalary("Emily", 20000.00);
+        employeePayrollData = employeePayrollService.readEmployeePayrollData(EmployeePayrollService.IOService.DB_IO);
+        System.out.println(employeePayrollData);
+        employeePayrollData = employeePayrollService.findRowsBetweenRange("2023-10-12");
+        System.out.println(employeePayrollData);
+        double AvgSalaryM = employeePayrollService.getAvgSalary("M");
+        double AvgSalaryF = employeePayrollService.getAvgSalary("F");
+        System.out.println("The average salary of Males : "+AvgSalaryM+" Average salary of Females : "+AvgSalaryF);
+        double SumSalaryM = employeePayrollService.getSumSalary("M");
+        double SumSalaryF = employeePayrollService.getSumSalary("F");
+        System.out.println("The average salary of Males : "+SumSalaryM+" Average salary of Females : "+SumSalaryF);
     }
-
-    public static void main(String[] args) {
-    }
-
 
     public List<EmployeePayrollData> readEmployeePayrollData(IOService ioService) {
         if(ioService.equals(IOService.DB_IO))
@@ -40,7 +44,6 @@ public class EmployeePayrollService {
         if (result == 0) return;
         EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
         if(employeePayrollData != null) employeePayrollData.salary = salary;
-
     }
 
     private EmployeePayrollData getEmployeePayrollData(String name) {
@@ -50,8 +53,18 @@ public class EmployeePayrollService {
                 .orElse(null);
     }
 
-    public List<EmployeePayrollData> findRowsBetweenRange() throws SQLException {
-        List<EmployeePayrollData> employeeRangeList = employeePayrollDBService.findEmployeeDataBetweenRange();
+    public List<EmployeePayrollData> findRowsBetweenRange(String range) throws SQLException {
+        List<EmployeePayrollData> employeeRangeList = employeePayrollDBService.findEmployeeDataBetweenRange(range);
         return employeeRangeList;
+    }
+
+    public Double getAvgSalary(String genderGroup)
+    {
+        return employeePayrollDBService.getAvgSalaryByGroup(genderGroup);
+    }
+
+    public Double getSumSalary(String genderGroup)
+    {
+        return employeePayrollDBService.getSumSalaryByGroup(genderGroup);
     }
 }
