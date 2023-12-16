@@ -6,7 +6,7 @@ import java.util.List;
 
 public class EmployeePayrollDBService {
     private static EmployeePayrollDBService employeePayrollDBService;
-    private PreparedStatement employeePayrollDataStatement;
+    public PreparedStatement employeePayrollDataStatement;
     private EmployeePayrollDBService(){
     }
 
@@ -81,12 +81,27 @@ public class EmployeePayrollDBService {
         }
     }
 
-    public int updateEmployeeData(String name, double salary) {
-        return this.updateEmployeeDataUsingStatement(name, salary);
+    public int updateEmployeeData(String name, double salary) throws SQLException {
+        return this.updateEmployeeDataUsingPreparedStatement(name, salary);
+    }
+
+    private int updateEmployeeDataUsingPreparedStatement(String name,double salary) throws SQLException {
+        try(Connection connection = this.getConnection()) {
+            PreparedStatement stmt = connection.prepareStatement("update emp set salary=? where name=?");
+            stmt.setDouble(1, salary);//1 specifies the first parameter in the query i.e. name
+            stmt.setString(2, name);
+            int i = stmt.executeUpdate();
+            System.out.println(i + " records updated");
+            return i;
+        }
+        catch (SQLException e ){
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private int updateEmployeeDataUsingStatement(String name, double salary) {
-        String sql = String.format("update employee_payroll_table set salary = %.2f where name = '%s';", salary, name);
+        String sql = String.format("update employee_payroll_table set salary = %.2f;", salary, name);
         try(Connection connection = this.getConnection()) {
             Statement statement = connection.createStatement();
             return statement.executeUpdate(sql);
@@ -94,5 +109,18 @@ public class EmployeePayrollDBService {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public List<EmployeePayrollData> findEmployeeDataBetweenRange() throws SQLException {
+        String sql = "SELECT * FROM employee_payroll_table WHERE start BETWEEN CAST('2023-11-12' AS DATE) AND DATE(NOW())";
+        List<EmployeePayrollData> employeeRangeList = new ArrayList<>();
+        try (Connection connection = this.getConnection()){
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            employeeRangeList = this.getEmployeePayrollData(resultSet);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return employeeRangeList;
     }
 }

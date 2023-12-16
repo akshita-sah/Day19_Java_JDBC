@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -20,11 +21,6 @@ public class EmployeePayrollService {
     }
 
     public static void main(String[] args) {
-        ArrayList<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-        EmployeePayrollService employeePayrollService = new EmployeePayrollService(employeePayrollList);
-        Scanner consoleInputReader = new Scanner(System.in);
-//        employeePayrollService.readEmployeePayrollData(consoleInputReader);
-//        employeePayrollService.writeEmployeePayrollData(IOService.CONSOLE_IO);
     }
 
 
@@ -39,7 +35,7 @@ public class EmployeePayrollService {
         return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
     }
 
-    public void updateEmployeeSalary(String name, double salary) {
+    public void updateEmployeeSalary(String name, double salary) throws SQLException {
         int result = employeePayrollDBService.updateEmployeeData(name, salary);
         if (result == 0) return;
         EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
@@ -52,5 +48,10 @@ public class EmployeePayrollService {
                 .filter(employeePayrollDataItem -> employeePayrollDataItem.name.equals(name))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public List<EmployeePayrollData> findRowsBetweenRange() throws SQLException {
+        List<EmployeePayrollData> employeeRangeList = employeePayrollDBService.findEmployeeDataBetweenRange();
+        return employeeRangeList;
     }
 }
