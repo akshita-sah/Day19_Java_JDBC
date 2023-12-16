@@ -28,6 +28,10 @@ public class EmployeePayrollDBService {
         return connection;
     }
 
+    /**
+     * To retrieve data from the database using sql query.
+     * @return List<EmployeePayrollData>
+     */
     public List<EmployeePayrollData> readData() {
         String sql = "SELECT * FROM employee_payroll_table; ";
         List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
@@ -82,12 +86,12 @@ public class EmployeePayrollDBService {
     }
 
     public int updateEmployeeData(String name, double salary) throws SQLException {
-        return this.updateEmployeeDataUsingPreparedStatement(name, salary);
+        return this.updateEmployeeDataUsingStatement(name, salary);
     }
 
     private int updateEmployeeDataUsingPreparedStatement(String name,double salary) throws SQLException {
         try(Connection connection = this.getConnection()) {
-            PreparedStatement stmt = connection.prepareStatement("update emp set salary=? where name=?");
+            PreparedStatement stmt = connection.prepareStatement("update employee_payroll_table set salary=? where name=?");
             stmt.setDouble(1, salary);//1 specifies the first parameter in the query i.e. name
             stmt.setString(2, name);
             int i = stmt.executeUpdate();
@@ -101,18 +105,24 @@ public class EmployeePayrollDBService {
     }
 
     private int updateEmployeeDataUsingStatement(String name, double salary) {
-        String sql = String.format("update employee_payroll_table set salary = %.2f;", salary, name);
+        String sql = String.format("update employee_payroll_table set salary = %.2f WHERE name = '%s';", salary, name);
         try(Connection connection = this.getConnection()) {
             Statement statement = connection.createStatement();
-            return statement.executeUpdate(sql);
+            int noOfUpdates =  statement.executeUpdate(sql);
+            return noOfUpdates;
         } catch (SQLException e ){
             e.printStackTrace();
         }
         return 0;
     }
 
-    public List<EmployeePayrollData> findEmployeeDataBetweenRange() throws SQLException {
-        String sql = "SELECT * FROM employee_payroll_table WHERE start BETWEEN CAST('2023-11-12' AS DATE) AND DATE(NOW())";
+    /**
+     * To find the list of entries between a certain range and return them.
+     * @return List<EmployeePayrollData>
+     * @throws SQLException
+     */
+    public List<EmployeePayrollData> findEmployeeDataBetweenRange(String range) throws SQLException {
+        String sql = String.format("SELECT * FROM employee_payroll_table WHERE start BETWEEN CAST('%s' AS DATE) AND DATE(NOW())",range);
         List<EmployeePayrollData> employeeRangeList = new ArrayList<>();
         try (Connection connection = this.getConnection()){
             Statement statement = connection.createStatement();
@@ -122,5 +132,44 @@ public class EmployeePayrollDBService {
             throwables.printStackTrace();
         }
         return employeeRangeList;
+    }
+
+    /**
+     * To find average and sum of salaries after grouping by gender and finding for each gender.
+     * @param genderGroup
+     * @return
+     */
+    public Double getAvgSalaryByGroup(String genderGroup)
+    {
+        String sql = String.format("SELECT AVG(salary) FROM employee_payroll_table WHERE gender = '%s'",genderGroup);
+        try (Connection connection = this.getConnection()){
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            Double avgSalary = 0.0;
+            while (resultSet.next()) {
+                avgSalary = resultSet.getDouble("AVG(salary)");
+            }
+            return avgSalary;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    public Double getSumSalaryByGroup(String genderGroup)
+    {
+        String sql = String.format("SELECT SUM(salary) FROM employee_payroll_table WHERE gender = '%s'",genderGroup);
+        try (Connection connection = this.getConnection()){
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            Double sumSalary = 0.0;
+            while (resultSet.next()) {
+                sumSalary = resultSet.getDouble("SUM(salary)");
+            }
+            return sumSalary;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0.0;
     }
 }
