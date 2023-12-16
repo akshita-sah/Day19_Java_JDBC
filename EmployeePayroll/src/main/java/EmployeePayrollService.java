@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -47,5 +48,10 @@ public class EmployeePayrollService {
                 .filter(employeePayrollDataItem -> employeePayrollDataItem.name.equals(name))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public List<EmployeePayrollData> findRowsBetweenRange() throws SQLException {
+        List<EmployeePayrollData> employeeRangeList = employeePayrollDBService.findEmployeeDataBetweenRange();
+        return employeeRangeList;
     }
 }

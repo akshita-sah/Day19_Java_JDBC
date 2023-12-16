@@ -20,4 +20,10 @@ public class EmployeePayrollServiceTest {
         boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Emily");
         Assert.assertTrue(result);
     }
+    @Test
+    public void givenEmployeePayrollStartDates_findNumberOfDataInAGivenRange() throws SQLException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        List<EmployeePayrollData> employeePayrollData = employeePayrollService.findRowsBetweenRange();
+        Assert.assertEquals(2, employeePayrollData.size());
+    }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class EmployeePayrollDBService {
     private static EmployeePayrollDBService employeePayrollDBService;
-    private PreparedStatement employeePayrollDataStatement;
+    public PreparedStatement employeePayrollDataStatement;
     private EmployeePayrollDBService(){
     }
 
@@ -44,7 +44,7 @@ public class EmployeePayrollDBService {
     public List<EmployeePayrollData> getEmployeePayrollData(String name) {
         List<EmployeePayrollData> employeePayrollList = null;
         if(this.employeePayrollDataStatement == null)
-            this.prepareStatementForEmployeeData();
+            this.prepareStatementForEmployeeData(name);
         try{
             employeePayrollDataStatement.setString(1, name);
             ResultSet resultSet = employeePayrollDataStatement.executeQuery();
@@ -71,11 +71,11 @@ public class EmployeePayrollDBService {
         return employeePayrollList;
     }
 
-    private void prepareStatementForEmployeeData() {
+    private void prepareStatementForEmployeeData(String findname) {
         try{
             Connection connection = this.getConnection();
-            String sql = "SELECT * FROM employee_payroll_table WHERE name = ?";
-            employeePayrollDataStatement = connection.prepareStatement(sql);
+            this.employeePayrollDataStatement = connection.prepareStatement("SELECT * FROM employee_payroll_table WHERE name = ?");
+            System.out.println(employeePayrollDataStatement);
         } catch (SQLException e){
             e.printStackTrace();
         }
@@ -94,5 +94,18 @@ public class EmployeePayrollDBService {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public List<EmployeePayrollData> findEmployeeDataBetweenRange() throws SQLException {
+        String sql = "SELECT * FROM employee_payroll_table WHERE start BETWEEN CAST('2023-11-12' AS DATE) AND DATE(NOW())";
+        List<EmployeePayrollData> employeeRangeList = new ArrayList<>();
+        try (Connection connection = this.getConnection()){
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            employeeRangeList = this.getEmployeePayrollData(resultSet);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return employeeRangeList;
     }
 }
