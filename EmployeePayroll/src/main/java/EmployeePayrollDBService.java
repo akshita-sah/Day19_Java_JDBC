@@ -44,7 +44,7 @@ public class EmployeePayrollDBService {
     public List<EmployeePayrollData> getEmployeePayrollData(String name) {
         List<EmployeePayrollData> employeePayrollList = null;
         if(this.employeePayrollDataStatement == null)
-            this.prepareStatementForEmployeeData(name);
+            this.prepareStatementForEmployeeData();
         try{
             employeePayrollDataStatement.setString(1, name);
             ResultSet resultSet = employeePayrollDataStatement.executeQuery();
@@ -71,22 +71,37 @@ public class EmployeePayrollDBService {
         return employeePayrollList;
     }
 
-    private void prepareStatementForEmployeeData(String findname) {
+    private void prepareStatementForEmployeeData() {
         try{
             Connection connection = this.getConnection();
-            this.employeePayrollDataStatement = connection.prepareStatement("SELECT * FROM employee_payroll_table WHERE name = ?");
-            System.out.println(employeePayrollDataStatement);
+            String sql = "SELECT * FROM employee_payroll_table WHERE name = ?";
+            employeePayrollDataStatement = connection.prepareStatement(sql);
         } catch (SQLException e){
             e.printStackTrace();
         }
     }
 
-    public int updateEmployeeData(String name, double salary) {
-        return this.updateEmployeeDataUsingStatement(name, salary);
+    public int updateEmployeeData(String name, double salary) throws SQLException {
+        return this.updateEmployeeDataUsingPreparedStatement(name, salary);
+    }
+
+    private int updateEmployeeDataUsingPreparedStatement(String name,double salary) throws SQLException {
+        try(Connection connection = this.getConnection()) {
+            PreparedStatement stmt = connection.prepareStatement("update emp set salary=? where name=?");
+            stmt.setDouble(1, salary);//1 specifies the first parameter in the query i.e. name
+            stmt.setString(2, name);
+            int i = stmt.executeUpdate();
+            System.out.println(i + " records updated");
+            return i;
+        }
+        catch (SQLException e ){
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private int updateEmployeeDataUsingStatement(String name, double salary) {
-        String sql = String.format("update employee_payroll_table set salary = %.2f where name = '%s';", salary, name);
+        String sql = String.format("update employee_payroll_table set salary = %.2f;", salary, name);
         try(Connection connection = this.getConnection()) {
             Statement statement = connection.createStatement();
             return statement.executeUpdate(sql);
