@@ -172,4 +172,33 @@ public class EmployeePayrollDBService {
         }
         return 0.0;
     }
+
+    /**
+     * This function adds a new entry to our database using the inputs given to it.
+     * @param name
+     * @param gender
+     * @param salary
+     * @param startDate
+     * @return
+     */
+    public EmployeePayrollData addEmployeeToPayroll(String name, String gender, double salary, LocalDate startDate) {
+        int empId = 1;
+        EmployeePayrollData employeePayrollData = null;
+        String sql = String.format("INSERT INTO employee_payroll_table (name,gender,salary,start) " +
+                "VALUES ('%s','%s','%s','%s')",name,gender,salary,startDate);
+        try (Connection connection = this.getConnection())
+        {
+            Statement statement = connection.createStatement();
+            int rowsAffected = statement.executeUpdate(sql,statement.RETURN_GENERATED_KEYS);
+            if(rowsAffected == 1)
+            {
+                ResultSet resultSet = statement.getGeneratedKeys();
+                if(resultSet.next()) empId = resultSet.getInt(1);
+            }
+            employeePayrollData = new EmployeePayrollData(empId,name,salary,startDate);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return employeePayrollData;
+    }
 }
