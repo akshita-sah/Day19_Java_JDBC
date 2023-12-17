@@ -1,4 +1,5 @@
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 public class EmployeePayrollService {
@@ -13,10 +14,10 @@ public class EmployeePayrollService {
 
     public static void main(String[] args) throws SQLException {
         EmployeePayrollService employeePayrollService = new EmployeePayrollService();
-        List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(EmployeePayrollService.IOService.DB_IO);
+        List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
         System.out.println(employeePayrollData);
         employeePayrollService.updateEmployeeSalary("Emily", 20000.00);
-        employeePayrollData = employeePayrollService.readEmployeePayrollData(EmployeePayrollService.IOService.DB_IO);
+        employeePayrollData = employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
         System.out.println(employeePayrollData);
         employeePayrollData = employeePayrollService.findRowsBetweenRange("2023-10-12");
         System.out.println(employeePayrollData);
@@ -66,5 +67,17 @@ public class EmployeePayrollService {
     public Double getSumSalary(String genderGroup)
     {
         return employeePayrollDBService.getSumSalaryByGroup(genderGroup);
+    }
+
+    public void addEmployeeToPayroll(String name, String gender, double salary, LocalDate startDate) throws SQLException {
+        employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name,gender,salary,startDate));
+    }
+
+    public void writeEmployeePayrollData(IOService ioService)
+    {
+        if(ioService.equals(IOService.CONSOLE_IO))
+            System.out.println("Writing Employee Payroll Roaster to console: "+employeePayrollList);
+        else if(ioService.equals(IOService.FILE_IO))
+            new EmployeePayrollFileIOService().writeData(employeePayrollList);
     }
 }
