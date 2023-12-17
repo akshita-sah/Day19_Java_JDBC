@@ -69,7 +69,7 @@ public class EmployeePayrollService {
         return employeePayrollDBService.getSumSalaryByGroup(genderGroup);
     }
 
-    public void addEmployeeToPayroll(String name, String gender, double salary, LocalDate startDate) {
+    public void addEmployeeToPayroll(String name, String gender, double salary, LocalDate startDate) throws SQLException {
         employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name,gender,salary,startDate));
     }
 

@@ -50,10 +50,11 @@ public class EmployeePayrollServiceTest {
         double AvgSumF = employeePayrollService.getSumSalary("F");
         Assert.assertEquals(20000.0,AvgSumF,0.0);
     }
-    //UC 7 - Add a new user to DB.
+    /*UC 7 - Add a new user to DB, UC 8 -  Add a new user in employee_payroll_table and also in
+    payroll_details table, also ensures either all or none operations take place.
+     */
     @Test
-    public void givenNewEmployee_WhenAdded_ShouldSyncWithDB()
-    {
+    public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() throws SQLException {
         EmployeePayrollService employeePayrollService = new EmployeePayrollService();
         employeePayrollService.readEmployeePayrollData(EmployeePayrollService.IOService.DB_IO);
         employeePayrollService.addEmployeeToPayroll("Mark","M",50000.0, LocalDate.now());
